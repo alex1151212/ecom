@@ -1,0 +1,6 @@
+mysql:
+  dns: root:1234@tcp(127.0.0.1:3307)/ecom?charset=utf8mb4&parseTime=True&loc=Local
+
+port:
+  server: ":8080"
+  udp: 3000

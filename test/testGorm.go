@@ -14,16 +14,13 @@ func main() {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&models.UserBasic{})
-	// db.AutoMigrate(&models.ShippingInfo{})
-	// db.AutoMigrate(&models.Message{})
-	// db.AutoMigrate(&models.Contact{})
-	// db.AutoMigrate(&models.GroupBasic{})
-	// db.AutoMigrate(&models.Community{})
+	db.AutoMigrate(&models.User{}, &models.ShoppingCart{}, &models.ShippingInfo{})
+	db.AutoMigrate(&models.Product{}, &models.ProductVariation{})
+	db.AutoMigrate(&models.Order{}, &models.OrderProduct{})
 
 	// Create
 
-	// user := &models.UserBasic{}
+	// user := &models.Us  erBasic{}
 	// user.Name = "yanming"
 	// db.Create(user)
 

@@ -3,4 +3,3 @@ mysql:
 
 port:
   server: ":8080"
-  udp: 3000

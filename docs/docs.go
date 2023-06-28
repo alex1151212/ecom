@@ -30,6 +30,144 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/createUser": {
+            "post": {
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "新增用戶",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "使用者名稱",
+                        "name": "username",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "使用者密碼",
+                        "name": "password",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "使用者確認密碼",
+                        "name": "repassword",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/deleteUser": {
+            "post": {
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "刪除用戶",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "使用者ID",
+                        "name": "id",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "所有用戶",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "使用者名稱",
+                        "name": "username",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "使用者密碼",
+                        "name": "password",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/updateUser": {
+            "post": {
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "編輯用戶",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "使用者ID",
+                        "name": "id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "使用者名稱",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "使用者密碼",
+                        "name": "password",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "電話號碼",
+                        "name": "phone",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "電子信箱",
+                        "name": "email",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     }
 }`

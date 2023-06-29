@@ -7,6 +7,10 @@ import (
 
 func main() {
 
+	// @securityDefinitions.apikey BearerAuth
+	// @in header
+	// @name Authorization
+
 	utils.InitConfig()
 	utils.InitMySQL()
 

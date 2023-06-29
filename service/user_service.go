@@ -2,6 +2,7 @@ package service
 
 import (
 	"ecom/utils"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -9,11 +10,13 @@ import (
 
 	"ecom/models"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
-//	 CreateUser
+//	 Register
 //	 @Summary 新增用戶
 //		@Tags		用戶
 //		@Param username formData string false		"使用者名稱"
@@ -27,7 +30,6 @@ func CreateUser(c *gin.Context) {
 	user.Username = c.PostForm("username")
 	password := c.PostForm("password")
 	repassword := c.PostForm("repassword")
-	fmt.Println(user.Username, "  >>>>>>>>>>>  ", password, repassword)
 
 	salt := fmt.Sprintf("%06d", rand.Int31())
 
@@ -83,7 +85,7 @@ func UpdateUser(c *gin.Context) {
 	user := models.User{}
 	id, _ := strconv.Atoi(c.PostForm("id"))
 	user.ID = uint(id)
-	user.Username = c.PostForm("name")
+	user.Username = c.PostForm("username")
 	user.Password = c.PostForm("password")
 	user.Phone = c.PostForm("phone")
 	user.Email = c.PostForm("email")
@@ -103,31 +105,99 @@ func UpdateUser(c *gin.Context) {
 
 }
 
-//	 Login
-//	 @Summary 所有用戶
+//	 LoginUser
+//	 @Summary 用戶登入
 //		@Tags		用戶
 //		@Param username formData string false		"使用者名稱"
 //		@Param password formData string false		"使用者密碼"
-//		@Success	200	{string}	json{"code","message"}
-//		@Router		/user/login [post]
+//		@Success	200	{string}	json "{"code","message"}"
+//		@Router		/login [post]
 func LoginUser(c *gin.Context) {
+	Auth().LoginHandler(c)
+}
 
-	data := models.User{}
-	name := c.PostForm("username")
-	password := c.PostForm("password")
+// LogoutUser
+// @Summary 用戶登出
+// @Security ApiKeyAuth
+// @Tags		用戶
+// @Success	200	{string}	json "{"code","message"}"
+// @Router		/logout [post]
+func LogoutUser(c *gin.Context) {
+	Auth().LogoutHandler(c)
+}
 
-	user := models.FindUserByName(name)
-	if user.Username == "" {
-		utils.RespFail(c.Writer, "該使用者不存在")
-		return
+func Auth() *jwt.GinJWTMiddleware {
+
+	payloadFunc := func(data interface{}) jwt.MapClaims {
+		if v, ok := data.(*models.User); ok {
+
+			return jwt.MapClaims{
+				viper.GetString("identityKey"): v.Username,
+			}
+
+		}
+		return jwt.MapClaims{}
 	}
-	flag := utils.ValidPassword(password, user.Salt, user.Password)
-	if !flag {
-		utils.RespFail(c.Writer, "密碼不正確")
-		return
-	}
-	enCodePwd := utils.MakePasssword(password, user.Salt)
-	data = models.FindUserByUsernameAndPwd(name, enCodePwd)
 
-	utils.RespOK(c.Writer, data, "登入成功")
+	identityHandler := func(c *gin.Context) interface{} {
+		claims := jwt.ExtractClaims(c)
+		return &models.User{
+			Username: claims[viper.GetString("identityKey")].(string),
+		}
+	}
+
+	authenticator := func(c *gin.Context) (interface{}, error) {
+
+		data := models.User{}
+
+		name, isNameEmpty := c.GetPostForm("username")
+		password, isPassword := c.GetPostForm("password")
+		if !isNameEmpty || !isPassword {
+			return "", jwt.ErrMissingLoginValues
+		}
+
+		user := models.FindUserByName(name)
+		if user.Username == "" {
+			return "", errors.New("user doesn't exist")
+		}
+		flag := utils.ValidPassword(password, user.Salt, user.Password)
+		if !flag {
+			return "", jwt.ErrMissingLoginValues
+		}
+		enCodePwd := utils.MakePasssword(password, user.Salt)
+		data = models.FindUserByUsernameAndPwd(name, enCodePwd)
+		return &models.User{
+			Username: data.Username,
+		}, nil
+
+	}
+
+	authorizator := func(data interface{}, c *gin.Context) bool {
+		// TODO 驗證方式重寫
+		if v, ok := data.(*models.User); ok && v.Username == "test1" {
+			return true
+		}
+
+		return false
+	}
+
+	return utils.AuthMiddleware(payloadFunc, identityHandler, authenticator, authorizator)
+}
+
+// Auth Test
+// @Summary 驗證功能測試路由
+// @Security BearerAuth
+// @Tags		用戶
+// @Success	200	{string}	json "{"code","message"}"
+// @Router		/auth/hello [get]
+func HelloHandler(c *gin.Context) {
+	identityKey := viper.GetString("jwt.identityKey")
+	fmt.Println(">>>>>>>>>>>>>>", identityKey)
+	claims := jwt.ExtractClaims(c)
+	user, _ := c.Get(viper.GetString("jwt.identityKey"))
+	c.JSON(200, gin.H{
+		"userID":   claims[identityKey],
+		"userName": user.(*models.User).Username,
+		"text":     "Hello World.",
+	})
 }

@@ -20,9 +20,19 @@ func Router() *gin.Engine {
 	//ping pong
 	r.GET("/", service.Ping)
 
-	r.POST("/user/createUser", service.CreateUser)
-	r.POST("/user/deleteUser", service.DeleteUser)
-	r.POST("/user/updateUser", service.UpdateUser)
-	r.POST("/user/login", service.LoginUser)
+	user := r.Group("/user")
+	user.POST("/createUser", service.CreateUser)
+	user.POST("/deleteUser", service.DeleteUser)
+	user.POST("/updateUser", service.UpdateUser)
+
+	r.POST("/product/createProduct", service.CreateProduct)
+
+	r.POST("/login", service.LoginUser)
+	auth := r.Group("/auth")
+	auth.POST("/logout", service.Auth().LogoutHandler)
+	auth.Use(service.Auth().MiddlewareFunc())
+	{
+		auth.GET("/hello", service.HelloHandler)
+	}
 	return r
 }

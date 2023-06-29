@@ -1,3 +1,30 @@
+definitions:
+  models.CreateProduct:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      productImg:
+        items:
+          type: string
+        type: array
+      variation:
+        items:
+          $ref: '#/definitions/models.CreateProductVariation'
+        type: array
+    type: object
+  models.CreateProductVariation:
+    properties:
+      price:
+        type: integer
+      productID:
+        type: integer
+      productSubcode:
+        type: integer
+      stock:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
@@ -10,6 +37,66 @@ paths:
             type: string
       tags:
       - ""
+  /auth/hello:
+    get:
+      responses:
+        "200":
+          description: '{"code","message"}'
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 驗證功能測試路由
+      tags:
+      - 用戶
+  /login:
+    post:
+      parameters:
+      - description: 使用者名稱
+        in: formData
+        name: username
+        type: string
+      - description: 使用者密碼
+        in: formData
+        name: password
+        type: string
+      responses:
+        "200":
+          description: '{"code","message"}'
+          schema:
+            type: string
+      summary: 用戶登入
+      tags:
+      - 用戶
+  /logout:
+    post:
+      responses:
+        "200":
+          description: '{"code","message"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用戶登出
+      tags:
+      - 用戶
+  /product/createProduct:
+    post:
+      parameters:
+      - description: ' '
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateProduct'
+      responses:
+        "200":
+          description: ' '
+          schema:
+            type: string
+      summary: 新增商品
+      tags:
+      - 商品
   /user/createUser:
     post:
       parameters:
@@ -48,25 +135,6 @@ paths:
       summary: 刪除用戶
       tags:
       - 用戶
-  /user/login:
-    post:
-      parameters:
-      - description: 使用者名稱
-        in: formData
-        name: username
-        type: string
-      - description: 使用者密碼
-        in: formData
-        name: password
-        type: string
-      responses:
-        "200":
-          description: code","message"}
-          schema:
-            type: string
-      summary: 所有用戶
-      tags:
-      - 用戶
   /user/updateUser:
     post:
       parameters:
@@ -98,4 +166,9 @@ paths:
       summary: 編輯用戶
       tags:
       - 用戶
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

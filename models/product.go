@@ -20,3 +20,16 @@ type ProductVariation struct {
 	Specifications map[string]string `gorm:"type:json"`
 	ProductID      uint
 }
+
+type CreateProduct struct {
+	Name        string                   `json:"name"`
+	Variation   []CreateProductVariation `json:"variation"  example:CreateProductVariation`
+	Description string                   `json:"description"`
+	ProductImg  []string                 `json:"productImg"`
+}
+type CreateProductVariation struct {
+	ProductSubcode uint `json:"productSubcode"`
+	Stock          uint `json:"stock"`
+	Price          int  `json:"price"`
+	ProductID      uint `json:"productID"`
+}

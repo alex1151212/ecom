@@ -3,3 +3,10 @@ mysql:
 
 port:
   server: ":8080"
+
+jwt:
+  secretKey: test
+  algorithm: HS256
+  identityKey : id
+  accessTokenExpireMinutes: 1
+  refreshTokenExpireMinutes: 5

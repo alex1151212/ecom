@@ -52,6 +52,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "用戶登出",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "tags": [
@@ -82,27 +103,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/logout": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "tags": [
-                    "用戶"
-                ],
-                "summary": "用戶登出",
-                "responses": {
-                    "200": {
-                        "description": "{\"code\",\"message\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/product/createProduct": {
             "post": {
                 "tags": [
@@ -116,7 +116,59 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateProduct"
+                            "$ref": "#/definitions/models.CreateProductType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": " ",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/getProduct": {
+            "get": {
+                "tags": [
+                    "商品"
+                ],
+                "summary": "取得產品資訊",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": " ",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": " ",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/updateProduct": {
+            "post": {
+                "tags": [
+                    "商品"
+                ],
+                "summary": "更新產品資訊",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateProductType"
                         }
                     }
                 ],
@@ -240,7 +292,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.CreateProduct": {
+        "models.CreateProductType": {
             "type": "object",
             "properties": {
                 "description": {
@@ -258,22 +310,65 @@ const docTemplate = `{
                 "variation": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.CreateProductVariation"
+                        "$ref": "#/definitions/models.CreateProductVariationType"
                     }
                 }
             }
         },
-        "models.CreateProductVariation": {
+        "models.CreateProductVariationType": {
             "type": "object",
             "properties": {
                 "price": {
                     "type": "integer"
                 },
-                "productID": {
+                "specifications": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "stock": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.UpdateProductType": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
                 },
-                "productSubcode": {
+                "name": {
+                    "type": "string"
+                },
+                "productImg": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "variation": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UpdateProductVariationType"
+                    }
+                }
+            }
+        },
+        "models.UpdateProductVariationType": {
+            "type": "object",
+            "properties": {
+                "price": {
                     "type": "integer"
+                },
+                "specifications": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "stock": {
                     "type": "integer"

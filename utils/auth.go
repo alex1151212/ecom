@@ -29,7 +29,8 @@ func AuthMiddleware(payloadFunc func(data interface{}) jwt.MapClaims,
 			Resp(c.Writer, code, "", message)
 		},
 		// 指定從哪裡獲得token 格式為："<source>:<name>" 如有多個，用逗號隔開
-		TokenLookup:   "header: Authorization, query: token, cookie: jwt",
+		// "header: Authorization, query: token, cookie: jwt"
+		TokenLookup:   "header: Authorization",
 		TokenHeadName: "Bearer",
 		TimeFunc:      time.Now,
 	})

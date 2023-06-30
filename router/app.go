@@ -25,14 +25,19 @@ func Router() *gin.Engine {
 	user.POST("/deleteUser", service.DeleteUser)
 	user.POST("/updateUser", service.UpdateUser)
 
-	r.POST("/product/createProduct", service.CreateProduct)
+	product := r.Group("/product")
+	product.GET("/getProduct", service.GetProduct)
+	product.POST("/createProduct", service.CreateProduct)
+	product.POST("/updateProduct", service.UpdateProduct)
 
 	r.POST("/login", service.LoginUser)
 	auth := r.Group("/auth")
-	auth.POST("/logout", service.Auth().LogoutHandler)
+
 	auth.Use(service.Auth().MiddlewareFunc())
 	{
 		auth.GET("/hello", service.HelloHandler)
+		auth.POST("/logout", service.Auth().LogoutHandler)
 	}
+
 	return r
 }

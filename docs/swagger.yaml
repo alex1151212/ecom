@@ -1,5 +1,5 @@
 definitions:
-  models.CreateProduct:
+  models.CreateProductType:
     properties:
       description:
         type: string
@@ -11,17 +11,45 @@ definitions:
         type: array
       variation:
         items:
-          $ref: '#/definitions/models.CreateProductVariation'
+          $ref: '#/definitions/models.CreateProductVariationType'
         type: array
     type: object
-  models.CreateProductVariation:
+  models.CreateProductVariationType:
     properties:
       price:
         type: integer
-      productID:
+      specifications:
+        additionalProperties:
+          type: string
+        type: object
+      stock:
         type: integer
-      productSubcode:
+    type: object
+  models.UpdateProductType:
+    properties:
+      description:
+        type: string
+      id:
         type: integer
+      name:
+        type: string
+      productImg:
+        items:
+          type: string
+        type: array
+      variation:
+        items:
+          $ref: '#/definitions/models.UpdateProductVariationType'
+        type: array
+    type: object
+  models.UpdateProductVariationType:
+    properties:
+      price:
+        type: integer
+      specifications:
+        additionalProperties:
+          type: string
+        type: object
       stock:
         type: integer
     type: object
@@ -49,6 +77,18 @@ paths:
       summary: 驗證功能測試路由
       tags:
       - 用戶
+  /auth/logout:
+    post:
+      responses:
+        "200":
+          description: '{"code","message"}'
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 用戶登出
+      tags:
+      - 用戶
   /login:
     post:
       parameters:
@@ -68,18 +108,6 @@ paths:
       summary: 用戶登入
       tags:
       - 用戶
-  /logout:
-    post:
-      responses:
-        "200":
-          description: '{"code","message"}'
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: 用戶登出
-      tags:
-      - 用戶
   /product/createProduct:
     post:
       parameters:
@@ -88,13 +116,46 @@ paths:
         name: product
         required: true
         schema:
-          $ref: '#/definitions/models.CreateProduct'
+          $ref: '#/definitions/models.CreateProductType'
       responses:
         "200":
           description: ' '
           schema:
             type: string
       summary: 新增商品
+      tags:
+      - 商品
+  /product/getProduct:
+    get:
+      parameters:
+      - description: ' '
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: ' '
+          schema:
+            type: string
+      summary: 取得產品資訊
+      tags:
+      - 商品
+  /product/updateProduct:
+    post:
+      parameters:
+      - description: ' '
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProductType'
+      responses:
+        "200":
+          description: ' '
+          schema:
+            type: string
+      summary: 更新產品資訊
       tags:
       - 商品
   /user/createUser:

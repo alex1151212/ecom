@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"ecom/utils"
+
+	"gorm.io/gorm"
+)
 
 type Product struct {
 	gorm.Model
@@ -9,27 +13,69 @@ type Product struct {
 	Description string
 	Sold        uint
 	Liked       uint
-	ProductImg  []string `gorm:"type:json"`
+	ProductImg  []string `gorm:"serializer:json"`
 }
 
 type ProductVariation struct {
 	gorm.Model
-	ProductSubcode uint
 	Stock          uint
 	Price          int
-	Specifications map[string]string `gorm:"type:json"`
+	Specifications map[string]string `gorm:"serializer:json"`
 	ProductID      uint
 }
 
-type CreateProduct struct {
-	Name        string                   `json:"name"`
-	Variation   []CreateProductVariation `json:"variation"  example:CreateProductVariation`
-	Description string                   `json:"description"`
-	ProductImg  []string                 `json:"productImg"`
+type CreateProductType struct {
+	Name        string                       `json:"name"`
+	Variation   []CreateProductVariationType `json:"variation"  example:CreateProductVariationType`
+	Description string                       `json:"description"`
+	ProductImg  []string                     `json:"productImg"`
 }
-type CreateProductVariation struct {
-	ProductSubcode uint `json:"productSubcode"`
-	Stock          uint `json:"stock"`
-	Price          int  `json:"price"`
-	ProductID      uint `json:"productID"`
+type CreateProductVariationType struct {
+	Stock          uint              `json:"stock"`
+	Price          int               `json:"price"`
+	Specifications map[string]string `json:"specifications"`
+}
+type UpdateProductType struct {
+	ID          uint                         `json:"id"`
+	Name        string                       `json:"name"`
+	Variation   []UpdateProductVariationType `json:"variation"  example:UpdateProductVariationType`
+	Description string                       `json:"description"`
+	ProductImg  []string                     `json:"productImg"`
+}
+type UpdateProductVariationType struct {
+	Stock          uint              `json:"stock"`
+	Price          int               `json:"price"`
+	Specifications map[string]string `json:"specifications"`
+}
+
+func CreateProduct(product Product) *gorm.DB {
+	return utils.DB.Create(&product)
+}
+
+func DeleteProduct(product Product) *gorm.DB {
+	return utils.DB.Delete(&product)
+}
+
+func UpdateProduct(product Product) *gorm.DB {
+
+	// utils.DB.Model(&product).Preload("Variation").Omit().Updates(Product{
+	// 	Name:        product.Name,
+	// 	Variation:   product.Variation,
+	// 	Description: product.Description,
+	// 	ProductImg:  product.ProductImg,
+	// })
+	return utils.DB.Preload("Variation").Model(&product).Omit().Updates(Product{
+		Name:        product.Name,
+		Variation:   product.Variation,
+		Description: product.Description,
+		ProductImg:  product.ProductImg,
+	})
+
+}
+func FindProduct(productId uint) Product {
+	product := Product{}
+
+	utils.DB.Preload("Variation").Where("Id = ?", productId).First(&product)
+
+	return product
 }

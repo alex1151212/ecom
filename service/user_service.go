@@ -118,12 +118,30 @@ func LoginUser(c *gin.Context) {
 
 // LogoutUser
 // @Summary 用戶登出
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags		用戶
 // @Success	200	{string}	json "{"code","message"}"
-// @Router		/logout [post]
+// @Router		/auth/logout [post]
 func LogoutUser(c *gin.Context) {
 	Auth().LogoutHandler(c)
+}
+
+// Auth Test
+// @Summary 驗證功能測試路由
+// @Security BearerAuth
+// @Tags		用戶
+// @Success	200	{string}	json "{"code","message"}"
+// @Router		/auth/hello [get]
+func HelloHandler(c *gin.Context) {
+	identityKey := viper.GetString("jwt.identityKey")
+	fmt.Println(">>>>>>>>>>>>>>", identityKey)
+	claims := jwt.ExtractClaims(c)
+	user, _ := c.Get(viper.GetString("jwt.identityKey"))
+	c.JSON(200, gin.H{
+		"userID":   claims[identityKey],
+		"userName": user.(*models.User).Username,
+		"text":     "Hello World.",
+	})
 }
 
 func Auth() *jwt.GinJWTMiddleware {
@@ -174,7 +192,7 @@ func Auth() *jwt.GinJWTMiddleware {
 
 	authorizator := func(data interface{}, c *gin.Context) bool {
 		// TODO 驗證方式重寫
-		if v, ok := data.(*models.User); ok && v.Username == "test1" {
+		if v, ok := data.(*models.User); ok && v.Username == "admin" {
 			return true
 		}
 
@@ -182,22 +200,4 @@ func Auth() *jwt.GinJWTMiddleware {
 	}
 
 	return utils.AuthMiddleware(payloadFunc, identityHandler, authenticator, authorizator)
-}
-
-// Auth Test
-// @Summary 驗證功能測試路由
-// @Security BearerAuth
-// @Tags		用戶
-// @Success	200	{string}	json "{"code","message"}"
-// @Router		/auth/hello [get]
-func HelloHandler(c *gin.Context) {
-	identityKey := viper.GetString("jwt.identityKey")
-	fmt.Println(">>>>>>>>>>>>>>", identityKey)
-	claims := jwt.ExtractClaims(c)
-	user, _ := c.Get(viper.GetString("jwt.identityKey"))
-	c.JSON(200, gin.H{
-		"userID":   claims[identityKey],
-		"userName": user.(*models.User).Username,
-		"text":     "Hello World.",
-	})
 }

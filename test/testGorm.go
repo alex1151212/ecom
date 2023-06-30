@@ -20,7 +20,7 @@ func main() {
 
 	// Create
 
-	// user := &models.Us  erBasic{}
+	// user := &models.UserBasic{}
 	// user.Name = "yanming"
 	// db.Create(user)
 

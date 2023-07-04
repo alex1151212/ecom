@@ -2,7 +2,6 @@ package models
 
 import (
 	"ecom/utils"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -11,6 +10,7 @@ import (
 // 基本使用者資訊
 type User struct {
 	gorm.Model
+	// TODO改成唯一值
 	Username     string
 	Password     string
 	Phone        string `valid:"matches(^09\\d{8}$)"`
@@ -28,7 +28,18 @@ type User struct {
 	// 購物車
 	ShoppingCart ShoppingCart `gorm:"foreignkey:OwnerID;"`
 	// 我的最愛
-	Favourite []uint `gorm:"type:json;"` // ProductID
+	Favourite []uint `gorm:"serializer:json;"` // ProductID
+}
+
+type UserInfo struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Phone    string `json:"phone";valid:"matches(^09\\d{8}$)"`
+	Email    string `json:"email";valid:"email"`
+	// Birthday  *time.Time
+	Sex       int    `json:"sex"`
+	AvatarURL string `json:"avatarUrl"`
 }
 
 // 購物車
@@ -59,31 +70,57 @@ func FindAllUser() {
 
 }
 
-func FindUserByName(name string) User {
+func FindUserByName(username string) User {
 	user := User{}
-	utils.DB.Where("username = ?", name).First(&user)
+	utils.DB.Where("username = ?", username).First(&user)
 
-	// Encode token
-	str := fmt.Sprintf("%d", time.Now().Unix())
-	token := utils.Md5Encode(str)
+	return user
+}
+func FindUserById(userId uint) User {
+	user := User{}
+	utils.DB.Where("Id = ?", userId).First(&user)
 
-	utils.DB.Model(&user).Where("Id = ? ", user.ID).Update("identity", token)
 	return user
 }
 
+func FindUserFavouriteProduct(username string) []Product {
+	product := []Product{}
+
+	userFavouriteProduct := FindUserByName(username).Favourite
+	utils.DB.Find(&product, userFavouriteProduct)
+	return product
+}
+
 func UpdateUser(user User) *gorm.DB {
-	return utils.DB.Model(&user).Updates(User{
-		Username: user.Username,
-		Password: user.Password,
-		Phone:    user.Phone,
-		Email:    user.Email,
-		Sex:      user.Sex,
+	return utils.DB.Model(&user).Where("Id = ?", user.ID).Omit().Updates(User{
+		Username:  user.Username,
+		Password:  user.Password,
+		Phone:     user.Phone,
+		Email:     user.Email,
+		Sex:       user.Sex,
+		AvatarURL: user.AvatarURL,
 		// Birthday:	user.Birthday,
 	})
+}
+
+func AddFavouriteProduct(username string, productId uint) *gorm.DB {
+	user := User{}
+	utils.DB.Where("username = ?", username).First(&user)
+	_, found := utils.SliceFind(user.Favourite, productId)
+	if found {
+		user.Favourite = utils.SliceRemove(user.Favourite, productId)
+		return utils.DB.Save(&user)
+	}
+
+	user.Favourite = append(user.Favourite, productId)
+	return utils.DB.Save(&user)
 }
 
 func FindUserByUsernameAndPwd(name string, password string) User {
 	user := User{}
 	utils.DB.Where("username = ? and password = ? ", name, password).First(&user)
 	return user
+}
+func UpdateUserAvatar(username string) {
+
 }

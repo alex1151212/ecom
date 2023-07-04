@@ -4,9 +4,11 @@ import (
 	"ecom/utils"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
-	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
 	"ecom/models"
 
@@ -74,35 +76,28 @@ func DeleteUser(c *gin.Context) {
 //	 UpdateUser
 //	 @Summary 編輯用戶
 //		@Tags		用戶
-//		@Param id formData string false		"使用者ID"
-//		@Param name formData string false		"使用者名稱"
-//		@Param password formData string false		"使用者密碼"
-//		@Param phone formData string false		"電話號碼"
-//		@Param email formData string false		"電子信箱"
+//		@Param user body models.UserInfo true " "
 //		@Success	200	{string}	json{"code","message"}
 //		@Router		/user/updateUser [post]
 func UpdateUser(c *gin.Context) {
 	user := models.User{}
-	id, _ := strconv.Atoi(c.PostForm("id"))
-	user.ID = uint(id)
-	user.Username = c.PostForm("username")
-	user.Password = c.PostForm("password")
-	user.Phone = c.PostForm("phone")
-	user.Email = c.PostForm("email")
 
-	_, err := govalidator.ValidateStruct(user)
+	err := c.BindJSON(&user)
+
 	if err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusOK, gin.H{
-			"code":    -1, //0成功 -1失敗
-			"message": "編輯用戶失敗",
-			"data":    user,
-		})
+
+		utils.RespFail(c.Writer, "編輯用戶失敗")
+		return
+	}
+
+	_, err = govalidator.ValidateStruct(user)
+	if err != nil {
+
+		utils.RespFail(c.Writer, "編輯用戶失敗")
 		return
 	}
 	models.UpdateUser(user)
 	utils.RespOK(c.Writer, user, "編輯用戶成功")
-
 }
 
 //	 LoginUser
@@ -126,6 +121,53 @@ func LogoutUser(c *gin.Context) {
 	Auth().LogoutHandler(c)
 }
 
+// AddFavouriteProduct
+// @Summary 添加商品到我的最愛
+// @Security BearerAuth
+// @Tags		用戶
+// @Param productId formData string true " "
+// @Success	200	{string}	json{"code","message"}
+// @Router		/auth/addFavouriteProduct [post]
+func AddFavouriteProduct(c *gin.Context) {
+	identityKey := viper.GetString("jwt.identityKey")
+	user, _ := c.Get(identityKey)
+
+	productId := c.PostForm("productId")
+	intProductId, err := strconv.Atoi(productId)
+
+	if err != nil {
+
+		utils.RespFail(c.Writer, "編輯用戶失敗")
+		return
+	}
+
+	_, err = govalidator.ValidateStruct(user)
+	if err != nil {
+
+		utils.RespFail(c.Writer, "編輯用戶失敗")
+		return
+	}
+
+	models.AddFavouriteProduct(user.(*models.User).Username, uint(intProductId))
+
+	utils.RespOK(c.Writer, user, "編輯用戶成功")
+}
+
+// GetFavouriteProduct
+// @Summary 添加商品到我的最愛
+// @Security BearerAuth
+// @Tags		用戶
+// @Success	200	{string}	json{"code","message"}
+// @Router		/auth/getFavouriteProduct [post]
+func GetFavouriteProduct(c *gin.Context) {
+	identityKey := viper.GetString("jwt.identityKey")
+	user, _ := c.Get(identityKey)
+
+	product := models.FindUserFavouriteProduct(user.(*models.User).Username)
+
+	utils.RespOK(c.Writer, product, "編輯用戶成功")
+}
+
 // Auth Test
 // @Summary 驗證功能測試路由
 // @Security BearerAuth
@@ -134,14 +176,65 @@ func LogoutUser(c *gin.Context) {
 // @Router		/auth/hello [get]
 func HelloHandler(c *gin.Context) {
 	identityKey := viper.GetString("jwt.identityKey")
-	fmt.Println(">>>>>>>>>>>>>>", identityKey)
 	claims := jwt.ExtractClaims(c)
-	user, _ := c.Get(viper.GetString("jwt.identityKey"))
+	user, _ := c.Get(identityKey)
 	c.JSON(200, gin.H{
 		"userID":   claims[identityKey],
 		"userName": user.(*models.User).Username,
 		"text":     "Hello World.",
 	})
+}
+
+// UploadUserAvatar
+// @Summary 用戶照片上傳
+// @Tags		用戶
+// @Param userId formData int false		"使用這ID"
+// @Param file formData file false		"1:1圖片"
+// @Success	200	{string}	json "{"code","message"}"
+// @Router		/user/uploadUserAvatar [post]
+func UploadUserAvatar(c *gin.Context) {
+	w := c.Writer
+	req := c.Request
+	userId := c.PostForm("userId")
+
+	if userId == "" {
+		utils.RespFail(w, "無使用者")
+		return
+	}
+
+	srcFile, head, err := req.FormFile("file")
+	if err != nil {
+		utils.RespFail(w, err.Error())
+		return
+	}
+
+	suffix := ".png"
+	oFileName := head.Filename
+	tem := strings.Split(oFileName, ".")
+	if len(tem) > 1 {
+		suffix = "." + tem[len(tem)-1]
+	}
+
+	fileName := fmt.Sprintf("%s%s", userId, suffix)
+	dstFile, err := os.Create("./assets/user_avatar/" + fileName)
+	if err != nil {
+		utils.RespFail(w, err.Error())
+		return
+	}
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		utils.RespFail(w, err.Error())
+		return
+	}
+	url := "./asset/user_avatar/" + fileName
+
+	user := models.User{}
+	id, _ := strconv.Atoi(userId)
+	user.ID = uint(id)
+	user.AvatarURL = url
+	models.UpdateUser(user)
+
+	utils.RespOK(w, url, "發送圖片成功")
 }
 
 func Auth() *jwt.GinJWTMiddleware {
@@ -150,7 +243,7 @@ func Auth() *jwt.GinJWTMiddleware {
 		if v, ok := data.(*models.User); ok {
 
 			return jwt.MapClaims{
-				viper.GetString("identityKey"): v.Username,
+				viper.GetString("jwt.identityKey"): v.Username,
 			}
 
 		}
@@ -160,7 +253,7 @@ func Auth() *jwt.GinJWTMiddleware {
 	identityHandler := func(c *gin.Context) interface{} {
 		claims := jwt.ExtractClaims(c)
 		return &models.User{
-			Username: claims[viper.GetString("identityKey")].(string),
+			Username: claims[viper.GetString("jwt.identityKey")].(string),
 		}
 	}
 
@@ -191,11 +284,9 @@ func Auth() *jwt.GinJWTMiddleware {
 	}
 
 	authorizator := func(data interface{}, c *gin.Context) bool {
-		// TODO 驗證方式重寫
-		if v, ok := data.(*models.User); ok && v.Username == "admin" {
+		if v, ok := data.(*models.User); ok && v.Username != "" {
 			return true
 		}
-
 		return false
 	}
 

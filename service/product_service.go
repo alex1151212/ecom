@@ -45,7 +45,7 @@ func GetProduct(c *gin.Context) {
 //	 UpdateProduct
 //	 @Summary 更新產品資訊
 //		@Tags		商品
-//		@Param product body models.UpdateProductType true " "
+//		@Param product body models.ProductInfo true " "
 //		@Success	200	{string}	json " "
 //		@Router		/product/updateProduct [post]
 func UpdateProduct(c *gin.Context) {
@@ -55,11 +55,41 @@ func UpdateProduct(c *gin.Context) {
 
 	if err != nil {
 		utils.RespFail(c.Writer, "輸入內容有誤")
+		return
 	}
 
-	// v := models.FindProduct(product.ID)
+	v := models.FindProduct(product.ID)
+	if v == nil {
+		utils.RespFail(c.Writer, "查無此產品")
+		return
+	}
 
 	models.UpdateProduct(product)
+	if err != nil {
+		utils.RespFail(c.Writer, "更新產品資訊錯誤")
+		return
+	}
 
 	utils.RespOK(c.Writer, product, "測試成功")
+}
+
+//	 FindProduct
+//	 @Summary 查詢產品資訊
+//		@Tags		商品
+//		@Param productId query int true " "
+//		@Success	200	{string}	json " "
+//		@Router		/product/findProduct [get]
+func FindProduct(c *gin.Context) {
+
+	productId := c.Query("productId")
+	intProductId, _ := strconv.Atoi(productId)
+
+	v := models.FindProduct(uint(intProductId))
+
+	if v == nil {
+		utils.RespFail(c.Writer, "查無此產品")
+		return
+	}
+
+	utils.RespOK(c.Writer, v, "測試成功")
 }

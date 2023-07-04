@@ -35,17 +35,9 @@ type CreateProductVariationType struct {
 	Price          int               `json:"price"`
 	Specifications map[string]string `json:"specifications"`
 }
-type UpdateProductType struct {
-	ID          uint                         `json:"id"`
-	Name        string                       `json:"name"`
-	Variation   []UpdateProductVariationType `json:"variation"  example:UpdateProductVariationType`
-	Description string                       `json:"description"`
-	ProductImg  []string                     `json:"productImg"`
-}
-type UpdateProductVariationType struct {
-	Stock          uint              `json:"stock"`
-	Price          int               `json:"price"`
-	Specifications map[string]string `json:"specifications"`
+type ProductInfo struct {
+	CreateProductType
+	ID uint `json:"id"`
 }
 
 func CreateProduct(product Product) *gorm.DB {
@@ -58,24 +50,26 @@ func DeleteProduct(product Product) *gorm.DB {
 
 func UpdateProduct(product Product) *gorm.DB {
 
-	// utils.DB.Model(&product).Preload("Variation").Omit().Updates(Product{
-	// 	Name:        product.Name,
-	// 	Variation:   product.Variation,
-	// 	Description: product.Description,
-	// 	ProductImg:  product.ProductImg,
-	// })
-	return utils.DB.Preload("Variation").Model(&product).Omit().Updates(Product{
+	utils.DB.Model(&product).Updates(Product{
 		Name:        product.Name,
-		Variation:   product.Variation,
 		Description: product.Description,
 		ProductImg:  product.ProductImg,
 	})
 
+	utils.DB.Model(&product).Association("Variation").Replace(product.Variation)
+
+	return utils.DB.Save(&product)
 }
-func FindProduct(productId uint) Product {
+
+func FindProduct(productId uint) *Product {
+	// TODO 只輸出指定欄位
 	product := Product{}
 
-	utils.DB.Preload("Variation").Where("Id = ?", productId).First(&product)
+	state := utils.DB.Preload("Variation").Model(&product).Where("Id = ?", productId).First(&product)
 
-	return product
+	if state.Error != nil {
+		return nil
+	}
+
+	return &product
 }

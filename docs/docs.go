@@ -31,6 +31,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/addFavouriteProduct": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "添加商品到我的最愛",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "productId",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/getFavouriteProduct": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "添加商品到我的最愛",
+                "responses": {
+                    "200": {
+                        "description": "code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/hello": {
             "get": {
                 "security": [
@@ -130,6 +181,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/product/findProduct": {
+            "get": {
+                "tags": [
+                    "商品"
+                ],
+                "summary": "查詢產品資訊",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": " ",
+                        "name": "productId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": " ",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/product/getProduct": {
             "get": {
                 "tags": [
@@ -168,7 +244,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateProductType"
+                            "$ref": "#/definitions/models.ProductInfo"
                         }
                     }
                 ],
@@ -250,39 +326,48 @@ const docTemplate = `{
                 "summary": "編輯用戶",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "使用者ID",
-                        "name": "id",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "使用者名稱",
-                        "name": "name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "使用者密碼",
-                        "name": "password",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "電話號碼",
-                        "name": "phone",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "電子信箱",
-                        "name": "email",
-                        "in": "formData"
+                        "description": " ",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserInfo"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "code\",\"message\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/uploadUserAvatar": {
+            "post": {
+                "tags": [
+                    "用戶"
+                ],
+                "summary": "用戶照片上傳",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "使用這ID",
+                        "name": "userId",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "1:1圖片",
+                        "name": "file",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\",\"message\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -332,7 +417,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UpdateProductType": {
+        "models.ProductInfo": {
             "type": "object",
             "properties": {
                 "description": {
@@ -353,25 +438,35 @@ const docTemplate = `{
                 "variation": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.UpdateProductVariationType"
+                        "$ref": "#/definitions/models.CreateProductVariationType"
                     }
                 }
             }
         },
-        "models.UpdateProductVariationType": {
+        "models.UserInfo": {
             "type": "object",
             "properties": {
-                "price": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
                 },
-                "specifications": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "password": {
+                    "type": "string"
                 },
-                "stock": {
+                "phone": {
+                    "type": "string"
+                },
+                "sex": {
+                    "description": "Birthday  *time.Time",
                     "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

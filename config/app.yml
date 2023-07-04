@@ -7,6 +7,6 @@ port:
 jwt:
   secretKey: test
   algorithm: HS256
-  identityKey : id
+  identityKey : username
   accessTokenExpireMinutes: 1
   refreshTokenExpireMinutes: 5

@@ -25,7 +25,7 @@ definitions:
       stock:
         type: integer
     type: object
-  models.UpdateProductType:
+  models.ProductInfo:
     properties:
       description:
         type: string
@@ -39,19 +39,26 @@ definitions:
         type: array
       variation:
         items:
-          $ref: '#/definitions/models.UpdateProductVariationType'
+          $ref: '#/definitions/models.CreateProductVariationType'
         type: array
     type: object
-  models.UpdateProductVariationType:
+  models.UserInfo:
     properties:
-      price:
+      avatarUrl:
+        type: string
+      email:
+        type: string
+      id:
         type: integer
-      specifications:
-        additionalProperties:
-          type: string
-        type: object
-      stock:
+      password:
+        type: string
+      phone:
+        type: string
+      sex:
+        description: Birthday  *time.Time
         type: integer
+      username:
+        type: string
     type: object
 info:
   contact: {}
@@ -65,6 +72,36 @@ paths:
             type: string
       tags:
       - ""
+  /auth/addFavouriteProduct:
+    post:
+      parameters:
+      - description: ' '
+        in: formData
+        name: productId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: code","message"}
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 添加商品到我的最愛
+      tags:
+      - 用戶
+  /auth/getFavouriteProduct:
+    post:
+      responses:
+        "200":
+          description: code","message"}
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 添加商品到我的最愛
+      tags:
+      - 用戶
   /auth/hello:
     get:
       responses:
@@ -125,6 +162,22 @@ paths:
       summary: 新增商品
       tags:
       - 商品
+  /product/findProduct:
+    get:
+      parameters:
+      - description: ' '
+        in: query
+        name: productId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: ' '
+          schema:
+            type: string
+      summary: 查詢產品資訊
+      tags:
+      - 商品
   /product/getProduct:
     get:
       parameters:
@@ -149,7 +202,7 @@ paths:
         name: product
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateProductType'
+          $ref: '#/definitions/models.ProductInfo'
       responses:
         "200":
           description: ' '
@@ -199,32 +252,37 @@ paths:
   /user/updateUser:
     post:
       parameters:
-      - description: 使用者ID
-        in: formData
-        name: id
-        type: string
-      - description: 使用者名稱
-        in: formData
-        name: name
-        type: string
-      - description: 使用者密碼
-        in: formData
-        name: password
-        type: string
-      - description: 電話號碼
-        in: formData
-        name: phone
-        type: string
-      - description: 電子信箱
-        in: formData
-        name: email
-        type: string
+      - description: ' '
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserInfo'
       responses:
         "200":
           description: code","message"}
           schema:
             type: string
       summary: 編輯用戶
+      tags:
+      - 用戶
+  /user/uploadUserAvatar:
+    post:
+      parameters:
+      - description: 使用這ID
+        in: formData
+        name: userId
+        type: integer
+      - description: 1:1圖片
+        in: formData
+        name: file
+        type: file
+      responses:
+        "200":
+          description: '{"code","message"}'
+          schema:
+            type: string
+      summary: 用戶照片上傳
       tags:
       - 用戶
 securityDefinitions:

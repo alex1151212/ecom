@@ -132,16 +132,13 @@ const docTemplate = `{
                 "summary": "用戶登入",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "使用者名稱",
-                        "name": "username",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "使用者密碼",
-                        "name": "password",
-                        "in": "formData"
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
                     }
                 ],
                 "responses": {

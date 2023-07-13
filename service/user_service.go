@@ -103,8 +103,7 @@ func UpdateUser(c *gin.Context) {
 //	 LoginUser
 //	 @Summary 用戶登入
 //		@Tags		用戶
-//		@Param username formData string false		"使用者名稱"
-//		@Param password formData string false		"使用者密碼"
+//		@Param user body service.LoginType true		"使用者名稱"
 //		@Success	200	{string}	json "{"code","message"}"
 //		@Router		/login [post]
 func LoginUser(c *gin.Context) {
@@ -158,7 +157,7 @@ func AddFavouriteProduct(c *gin.Context) {
 // @Security BearerAuth
 // @Tags		用戶
 // @Success	200	{string}	json{"code","message"}
-// @Router		/auth/getFavouriteProduct [post]
+// @Router		/auth/getFavouriteProduct [get]
 func GetFavouriteProduct(c *gin.Context) {
 	identityKey := viper.GetString("jwt.identityKey")
 	user, _ := c.Get(identityKey)
@@ -258,15 +257,21 @@ func Auth() *jwt.GinJWTMiddleware {
 	}
 
 	authenticator := func(c *gin.Context) (interface{}, error) {
-
+		type LoginType struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
 		data := models.User{}
+		login := LoginType{}
 
-		name, isNameEmpty := c.GetPostForm("username")
-		password, isPassword := c.GetPostForm("password")
-		if !isNameEmpty || !isPassword {
-			return "", jwt.ErrMissingLoginValues
+		err := c.BindJSON(&login)
+
+		if err != nil {
+			return "", errors.New("user input error")
 		}
 
+		name := login.Username
+		password := login.Password
 		user := models.FindUserByName(name)
 		if user.Username == "" {
 			return "", errors.New("user doesn't exist")

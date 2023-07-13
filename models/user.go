@@ -121,6 +121,3 @@ func FindUserByUsernameAndPwd(name string, password string) User {
 	utils.DB.Where("username = ? and password = ? ", name, password).First(&user)
 	return user
 }
-func UpdateUserAvatar(username string) {
-
-}

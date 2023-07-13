@@ -4,6 +4,7 @@ import (
 	docs "ecom/docs"
 	"ecom/service"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -12,7 +13,7 @@ import (
 func Router() *gin.Engine {
 
 	r := gin.Default()
-
+	r.Use(cors.New(CorsConfig()))
 	//swagger
 	docs.SwaggerInfo.BasePath = ""
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -39,7 +40,7 @@ func Router() *gin.Engine {
 	{
 		auth.GET("/hello", service.HelloHandler)
 		auth.POST("/addFavouriteProduct", service.AddFavouriteProduct)
-		auth.POST("/getFavouriteProduct", service.GetFavouriteProduct)
+		auth.GET("/getFavouriteProduct", service.GetFavouriteProduct)
 		auth.POST("/logout", service.Auth().LogoutHandler)
 	}
 

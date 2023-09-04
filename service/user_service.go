@@ -1,6 +1,7 @@
 package service
 
 import (
+	"ecom/schemas"
 	"ecom/utils"
 	"errors"
 	"fmt"
@@ -21,22 +22,25 @@ import (
 //	 Register
 //	 @Summary 新增用戶
 //		@Tags		用戶
-//		@Param username formData string false		"使用者名稱"
-//		@Param password formData string false		"使用者密碼"
-//		@Param repassword formData string false		"使用者確認密碼"
+//		@Param user body schemas.RegisterType true " "
 //		@Success	200	{string}	json{"code","message"}
 //		@Router		/user/createUser [post]
 func CreateUser(c *gin.Context) {
 	user := models.User{}
 
-	user.Username = c.PostForm("username")
-	password := c.PostForm("password")
-	repassword := c.PostForm("repassword")
+	register := schemas.RegisterType{}
+
+	err := c.BindJSON(&register)
+
+	if err != nil {
+		utils.RespFail(c.Writer, "輸入資訊有誤")
+		return
+	}
 
 	salt := fmt.Sprintf("%06d", rand.Int31())
 
 	data := models.FindUserByName(user.Username)
-	if user.Username == "" || password == "" || repassword == "" {
+	if register.Username == "" || register.Password == "" || register.Repassword == "" {
 
 		utils.RespFail(c.Writer, "使用者名稱或密碼不能為空")
 		return
@@ -45,12 +49,12 @@ func CreateUser(c *gin.Context) {
 		utils.RespFail(c.Writer, "使用者名稱已註冊")
 		return
 	}
-	if password != repassword {
+	if register.Password != register.Repassword {
 		utils.RespFail(c.Writer, "兩次密碼不一致")
 		return
 	}
 
-	user.Password = utils.MakePasssword(password, salt)
+	user.Password = utils.MakePasssword(register.Password, salt)
 	user.Salt = salt
 	models.CreateUser(user)
 
@@ -103,7 +107,7 @@ func UpdateUser(c *gin.Context) {
 //	 LoginUser
 //	 @Summary 用戶登入
 //		@Tags		用戶
-//		@Param user body service.LoginType true		"使用者名稱"
+//		@Param user body schemas.LoginType	true "使用者名稱"
 //		@Success	200	{string}	json "{"code","message"}"
 //		@Router		/login [post]
 func LoginUser(c *gin.Context) {
@@ -114,7 +118,7 @@ func LoginUser(c *gin.Context) {
 // @Summary 用戶登出
 // @Security BearerAuth
 // @Tags		用戶
-// @Success	200	{string}	json "{"code","message"}"
+// @Success	200	{string} true	json "{"code","message"}"
 // @Router		/auth/logout [post]
 func LogoutUser(c *gin.Context) {
 	Auth().LogoutHandler(c)
@@ -153,7 +157,7 @@ func AddFavouriteProduct(c *gin.Context) {
 }
 
 // GetFavouriteProduct
-// @Summary 添加商品到我的最愛
+// @Summary 查詢我的最愛
 // @Security BearerAuth
 // @Tags		用戶
 // @Success	200	{string}	json{"code","message"}

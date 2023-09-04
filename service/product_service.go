@@ -28,20 +28,6 @@ func CreateProduct(c *gin.Context) {
 	utils.RespOK(c.Writer, product, "產品新增成功")
 }
 
-//	 GetProduct
-//	 @Summary 取得產品資訊
-//		@Tags		商品
-//		@Param id query uint true " "
-//		@Success	200	{string}	json " "
-//		@Router		/product/getProduct [get]
-func GetProduct(c *gin.Context) {
-	id := c.Query("id")
-	uintId, _ := strconv.ParseUint(id, 10, 32)
-	v := models.FindProduct(uint(uintId))
-
-	utils.RespOK(c.Writer, v, "測試成功")
-}
-
 //	 UpdateProduct
 //	 @Summary 更新產品資訊
 //		@Tags		商品
@@ -73,13 +59,13 @@ func UpdateProduct(c *gin.Context) {
 	utils.RespOK(c.Writer, product, "測試成功")
 }
 
-//	 FindProduct
+//	 GetProduct
 //	 @Summary 查詢產品資訊
 //		@Tags		商品
 //		@Param productId query int true " "
 //		@Success	200	{string}	json " "
-//		@Router		/product/findProduct [get]
-func FindProduct(c *gin.Context) {
+//		@Router		/product/getProduct [get]
+func GetProduct(c *gin.Context) {
 
 	productId := c.Query("productId")
 	intProductId, _ := strconv.Atoi(productId)

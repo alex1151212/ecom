@@ -31,7 +31,6 @@ func Router() *gin.Engine {
 	product.GET("/getProduct", service.GetProduct)
 	product.POST("/createProduct", service.CreateProduct)
 	product.POST("/updateProduct", service.UpdateProduct)
-	product.GET("/findProduct", service.FindProduct)
 
 	r.POST("/login", service.LoginUser)
 	auth := r.Group("/auth")

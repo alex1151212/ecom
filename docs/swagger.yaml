@@ -25,6 +25,13 @@ definitions:
       stock:
         type: integer
     type: object
+  models.LoginType:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   models.ProductInfo:
     properties:
       description:
@@ -91,7 +98,7 @@ paths:
       tags:
       - 用戶
   /auth/getFavouriteProduct:
-    post:
+    get:
       responses:
         "200":
           description: code","message"}
@@ -134,7 +141,7 @@ paths:
         name: user
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/models.LoginType'
       responses:
         "200":
           description: '{"code","message"}'
@@ -160,7 +167,7 @@ paths:
       summary: 新增商品
       tags:
       - 商品
-  /product/findProduct:
+  /product/getProduct:
     get:
       parameters:
       - description: ' '
@@ -174,22 +181,6 @@ paths:
           schema:
             type: string
       summary: 查詢產品資訊
-      tags:
-      - 商品
-  /product/getProduct:
-    get:
-      parameters:
-      - description: ' '
-        in: query
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: ' '
-          schema:
-            type: string
-      summary: 取得產品資訊
       tags:
       - 商品
   /product/updateProduct:

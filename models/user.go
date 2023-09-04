@@ -121,3 +121,14 @@ func FindUserByUsernameAndPwd(name string, password string) User {
 	utils.DB.Where("username = ? and password = ? ", name, password).First(&user)
 	return user
 }
+
+// func AddToShoppingCart(username string, productId uint) *gorm.DB {
+// 	user := User{}
+// 	utils.DB.Where("username = ?", username).First(&user)
+// 	_, found := utils.SliceFind(user.Favourite, productId)
+// 	if found {
+// 		return nil
+// 	}
+// 	user.ShoppingCart.ProductList = append(user.ShoppingCart.ProductList, productId)
+// 	return utils.DB.Save(&user)
+// }

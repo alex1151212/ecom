@@ -62,7 +62,7 @@ const docTemplate = `{
             }
         },
         "/auth/getFavouriteProduct": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -137,7 +137,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/models.LoginType"
                         }
                     }
                 ],
@@ -178,7 +178,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/product/findProduct": {
+        "/product/getProduct": {
             "get": {
                 "tags": [
                     "商品"
@@ -189,31 +189,6 @@ const docTemplate = `{
                         "type": "integer",
                         "description": " ",
                         "name": "productId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": " ",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/product/getProduct": {
-            "get": {
-                "tags": [
-                    "商品"
-                ],
-                "summary": "取得產品資訊",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": " ",
-                        "name": "id",
                         "in": "query",
                         "required": true
                     }
@@ -411,6 +386,17 @@ const docTemplate = `{
                 },
                 "stock": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.LoginType": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

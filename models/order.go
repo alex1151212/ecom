@@ -42,6 +42,7 @@ type OrderProduct struct {
 	OrderID        uint
 }
 
+/* OrderProduct */
 func CreateOrderProduct(product OrderProduct) *gorm.DB {
 	return utils.DB.Create(&product)
 }
@@ -54,9 +55,40 @@ func UpdateOrderProduct(product OrderProduct) *gorm.DB {
 	utils.DB.Model(&product).Updates(OrderProduct{
 		ProductSubcode: product.ProductSubcode,
 		Quantity:       product.Quantity,
+		Price:          product.Price,
+		Status:         product.Status,
+		ProductID:      product.ProductID,
+		ShoppingCartID: product.ShoppingCartID,
+		OrderID:        product.OrderID,
 	})
 
 	// utils.DB.Model(&product).Association("Variation").Replace(product.Variation)
 
 	return utils.DB.Save(&product)
+}
+
+func FindOrderProduct(orderProductId uint) {
+
+}
+
+/* Order */
+
+func CreateOrder(order Order) *gorm.DB {
+	return utils.DB.Create(&order)
+}
+
+func DeleteOrder(order Order) *gorm.DB {
+	return utils.DB.Delete(&order)
+}
+
+func UpdateOrder(order Order) *gorm.DB {
+	utils.DB.Model(&order).Updates(Order{
+		BillStatus:  order.BillStatus,
+		OrderStatus: order.OrderStatus,
+		PayStatus:   order.PayStatus,
+	})
+
+	// utils.DB.Model(&product).Association("Variation").Replace(product.Variation)
+
+	return utils.DB.Save(&order)
 }
